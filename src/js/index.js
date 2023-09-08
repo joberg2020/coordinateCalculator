@@ -32,20 +32,54 @@ export function showSquare() {
 // const canvasTesting = new CanvasTesting();
 const coordCalc = new CoordinateCalculator({x: 506.47, y: 487.6}, {x: 502.61, y: 515.51}, {x: 487.95, y: 549.69}, {x: 439.05, y: 528.87}, {x: 429.90, y: 484.37})
 coordCalc.setInnerPoints({x: 500, y: 500}, {x: 451.21, y: 501.46})
-coordCalc.setOuterPoints()
-console.log('coordCalc: ', coordCalc)
-console.log('coordCalc.getCenterPoint(): ', coordCalc.getCenterPoint())
-console.log('coordCalc.getMaxMinFromPoints(): ', coordCalc.getMaxMinFromPoints({x: 10, y: 10}, {x: 100, y: 100}, {x: 200, y: 200}))
 
 const canvas = document.getElementById('canvas');
+
+canvas.setAttribute('height', coordCalc.suggestCanvasSize().height + 500);
+canvas.setAttribute('width', coordCalc.suggestCanvasSize().width + 500);
 const ctx = canvas.getContext('2d');
+canvas.addEventListener('click', function(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left)/6; // ctx.scale - faktorn och pga byte av x och y i coordCalc.rotate() pga fel axlar i kartan.
+    const y = (-event.clientY + rect.top)/6; // ctx.scale - faktorn
+
+    const translatedX = (y - dy); 
+    const translatedY = (x - dx); 
+  
+    console.log(`Klickade på koordinat: x=${translatedX}, y=${translatedY}`);
+  
+    // Gör något med x och y, till exempel rita en punkt
+    ctx.beginPath();
+    ctx.arc(translatedY, translatedX, .5, 0, Math.PI * 2);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    ctx.closePath();
+  });
+coordCalc.rotate();
+
+ctx.scale(6, -6);
+
+const dx = -470
+const dy = -510 
+ctx.translate(dx, dy); 
+
 canvas.style.border = '1px solid black';
-canvas.setAttribute('height', coordCalc.suggestCanvasSize().height + 20);
-canvas.setAttribute('width', coordCalc.suggestCanvasSize().width + 20);
-ctx.translate(coordCalc.getCenterPoint().centerX, coordCalc.getCenterPoint().centerY);
-ctx.scale(1, -1);
+
+
+let flag = true;
+let point1 = {}
 for (const point of coordCalc.outerPoints) {
-    ctx.move(point.x, point.y);
-    ctx.line
+    if (flag) {
+        ctx.moveTo(point.x, point.y);
+        flag = false;
+        point1 = point;
+    } else {
+    ctx.lineTo(point.x, point.y);
+    }
 }
-// Inte helt intuitivt. Man kan inte veta vilka punkter som är grannar. Det måste användaren veta och ange. Då skulle man kunna strukturera dem som en dubbel circular linked list.
+ctx.lineTo(point1.x, point1.y)
+
+ctx.lineWidth = .4;
+ctx.stroke();
+
+// Maybe structure points in double linked list?

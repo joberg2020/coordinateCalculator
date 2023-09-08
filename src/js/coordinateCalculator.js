@@ -33,6 +33,22 @@ export class CoordinateCalculator {
     this.innerPoints = points;
   }
 
+  rotate() {
+    for (const point of this.outerPoints) {
+      [point.x, point.y] = [point.y, point.x];
+    }
+    for (const point of this.innerPoints) {
+      [point.x, point.y] = [point.y, point.x];
+    }
+  }
+
+  rotatePoint(point, angle) {
+    return (point.x * Math.cos(angle) - point.y * Math.sin(angle), point.x * Math.sin(angle) + point.y * Math.cos(angle));
+  }
+
+  rotatePoints(angle) {
+    this.points.map(point => this.rotatePoint(point, angle));
+  }
 
   getCenterPoint() {
     const { minX, maxX, minY, maxY } = this.getMaxMinFromPoints(...this.outerPoints);
